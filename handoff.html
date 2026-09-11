@@ -1,0 +1,647 @@
+<title>BlockBlock 引き継ぎノート</title>
+<style>
+  :root {
+    --bg: #EEF1F4;
+    --surface: #FFFFFF;
+    --surface-2: #F6F4EF;
+    --ink: #1B2027;
+    --ink-soft: #55606B;
+    --ink-faint: #7C8790;
+    --line: #D9DEE3;
+    --brand-red: #A8402B;
+    --brand-red-soft: #E7D3CD;
+    --brand-yellow: #B8791A;
+    --status-done-ink: #1F6B4B;
+    --status-done-bg: #DEEEE5;
+    --status-todo-ink: #A8461C;
+    --status-todo-bg: #F7E3D6;
+    --focus-ring: #2F6FB0;
+    --shadow: 0 1px 2px rgba(27,32,39,0.06), 0 6px 20px rgba(27,32,39,0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181C;
+      --surface: #1B2126;
+      --surface-2: #211E19;
+      --ink: #E9ECEF;
+      --ink-soft: #A6B0B9;
+      --ink-faint: #7E8891;
+      --line: #2D353C;
+      --brand-red: #E2694C;
+      --brand-red-soft: #4A2A22;
+      --brand-yellow: #E8B24A;
+      --status-done-ink: #7FD3AC;
+      --status-done-bg: #1C3229;
+      --status-todo-ink: #F0A374;
+      --status-todo-bg: #3A2419;
+      --focus-ring: #6AA9E0;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14181C;
+    --surface: #1B2126;
+    --surface-2: #211E19;
+    --ink: #E9ECEF;
+    --ink-soft: #A6B0B9;
+    --ink-faint: #7E8891;
+    --line: #2D353C;
+    --brand-red: #E2694C;
+    --brand-red-soft: #4A2A22;
+    --brand-yellow: #E8B24A;
+    --status-done-ink: #7FD3AC;
+    --status-done-bg: #1C3229;
+    --status-todo-ink: #F0A374;
+    --status-todo-bg: #3A2419;
+    --focus-ring: #6AA9E0;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+    line-height: 1.75;
+    -webkit-text-size-adjust: 100%;
+  }
+  h1, h2, h3, .disp {
+    font-family: "Big Shoulders Display", "Hiragino Sans", sans-serif;
+    text-wrap: balance;
+    letter-spacing: 0.01em;
+  }
+  code, .mono, .fact-value, .term-def code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  a { color: var(--brand-red); }
+  a:hover { text-decoration-thickness: 2px; }
+  :focus-visible {
+    outline: 2.5px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px 100px; }
+
+  /* ---- top bar ---- */
+  .topbar {
+    position: sticky; top: 0; z-index: 40;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner {
+    max-width: 760px; margin: 0 auto; padding: 12px 20px;
+    display: flex; align-items: baseline; gap: 14px;
+  }
+  .brand {
+    font-family: "Big Shoulders Display", sans-serif;
+    font-weight: 800; font-size: 1.15rem; letter-spacing: 0.02em;
+    white-space: nowrap;
+    color: var(--ink);
+  }
+  .brand em { color: var(--brand-red); font-style: normal; }
+  .nav {
+    display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a {
+    flex: none;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem; letter-spacing: 0.03em;
+    color: var(--ink-soft); text-decoration: none;
+    border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 11px;
+    background: var(--surface);
+  }
+  .nav a:hover { color: var(--ink); border-color: var(--ink-faint); }
+
+  /* ---- hero ---- */
+  .hero { padding: 44px 0 30px; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--brand-red); margin: 0 0 10px;
+  }
+  h1.title {
+    font-size: clamp(2rem, 7vw, 2.9rem);
+    line-height: 1.05; margin: 0 0 16px; font-weight: 800;
+  }
+  .lede {
+    font-size: 1.08rem; color: var(--ink-soft); max-width: 62ch; margin: 0;
+  }
+  .hero-meta {
+    margin-top: 22px; display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .pill {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.72rem;
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 5px 12px; color: var(--ink-soft); background: var(--surface);
+  }
+
+  /* ---- sections ---- */
+  section { padding: 46px 0; border-top: 1px solid var(--line); }
+  section:first-of-type { border-top: none; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; }
+  .sec-num {
+    font-family: "Big Shoulders Display", sans-serif; font-weight: 800;
+    font-size: 1.05rem; color: var(--brand-red);
+    letter-spacing: 0.04em;
+  }
+  h2 { font-size: clamp(1.5rem, 5vw, 1.9rem); margin: 0; font-weight: 700; }
+  .sec-sub { color: var(--ink-soft); font-size: 0.98rem; margin: -6px 0 22px; max-width: 62ch; }
+  p { max-width: 66ch; }
+  h3 { font-size: 1.15rem; margin: 28px 0 10px; font-weight: 700; }
+
+  /* ---- fact grid ---- */
+  .facts {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px;
+    background: var(--line); border: 1px solid var(--line); border-radius: 10px;
+    overflow: hidden; margin: 24px 0; box-shadow: var(--shadow);
+  }
+  .fact { background: var(--surface); padding: 14px 16px; }
+  .fact-label {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.68rem;
+    color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em;
+    margin: 0 0 4px;
+  }
+  .fact-value {
+    font-size: 0.92rem; font-variant-numeric: tabular-nums; word-break: break-word;
+    color: var(--ink);
+  }
+  .fact-value a { word-break: break-all; }
+  @media (max-width: 520px) { .facts { grid-template-columns: 1fr 1fr; } }
+
+  /* ---- glossary term ---- */
+  button.term {
+    all: unset; cursor: pointer; position: relative;
+    font: inherit; color: var(--ink);
+    border-bottom: 2px dotted var(--brand-yellow);
+    padding-bottom: 1px;
+  }
+  button.term:hover, button.term:focus-visible { color: var(--brand-red); }
+  .tip {
+    display: none; position: absolute; z-index: 30;
+    left: 50%; top: 100%; transform: translate(-50%, 8px);
+    width: max(220px, min(78vw, 300px));
+    background: var(--ink); color: var(--bg);
+    font-family: "IBM Plex Mono", monospace; font-size: 0.74rem; line-height: 1.55;
+    padding: 10px 12px; border-radius: 8px; box-shadow: var(--shadow);
+    text-align: left; white-space: normal;
+  }
+  .tip::before {
+    content: ""; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+    border: 6px solid transparent; border-bottom-color: var(--ink);
+  }
+  button.term:hover .tip,
+  button.term:focus-visible .tip,
+  button.term.open .tip { display: block; }
+
+  /* ---- diagram ---- */
+  figure.diagram { margin: 26px 0 8px; }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .diagram-scroll { overflow-x: auto; border-radius: 10px; }
+  .node rect { fill: var(--surface-2); stroke: var(--ink-faint); stroke-width: 1.4; }
+  .node text { fill: var(--ink); }
+  .node.outcome-yes rect { fill: var(--status-done-bg); stroke: var(--status-done-ink); }
+  .node.outcome-yes text { fill: var(--status-done-ink); }
+  .node.outcome-no rect { fill: var(--status-todo-bg); stroke: var(--status-todo-ink); }
+  .node.outcome-no text { fill: var(--status-todo-ink); }
+  .diagram .flow-line { stroke: var(--ink-faint); stroke-width: 1.6; fill: none; }
+  .diagram .branch-label { fill: var(--ink-faint); font-size: 11px; }
+  figcaption {
+    font-size: 0.85rem; color: var(--ink-soft); margin-top: 10px; max-width: 62ch;
+  }
+
+  /* ---- todo / roadmap cards ---- */
+  .stack { display: grid; gap: 12px; margin: 20px 0; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+  .card-head h4 { margin: 0; font-size: 1.02rem; font-weight: 700; font-family: inherit; }
+  .badge {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.66rem; letter-spacing: 0.04em;
+    padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+    background: var(--status-todo-bg); color: var(--status-todo-ink);
+  }
+  .card p { margin: 6px 0 0; color: var(--ink-soft); font-size: 0.94rem; max-width: none; }
+  .badge.rank-must { background: var(--brand-red); color: #fff; }
+  .badge.rank-important { background: var(--status-todo-bg); color: var(--status-todo-ink); }
+  .badge.rank-later { background: var(--line); color: var(--ink-soft); }
+  .gap-card .gap-now { margin: 8px 0 0; color: var(--ink-soft); font-size: 0.94rem; max-width: none; }
+  .gap-card .gap-fix {
+    margin: 10px 0 0; padding: 10px 12px; background: var(--surface-2); border-radius: 8px;
+    font-size: 0.94rem; color: var(--ink); max-width: none;
+  }
+  .gap-card .gap-fix b { color: var(--brand-red); }
+  .rank-legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 22px; }
+  .rank-legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--ink-soft); }
+  .rank-legend .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+  /* ---- notice / aside ---- */
+  .notice {
+    border-left: 4px solid var(--brand-red); background: var(--surface-2);
+    border-radius: 0 10px 10px 0; padding: 14px 18px; margin: 20px 0;
+    font-size: 0.92rem; color: var(--ink); max-width: none;
+  }
+  .notice p { margin: 0; max-width: none; }
+  .notice p + p { margin-top: 8px; }
+  .notice-label {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.7rem; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--brand-red); display: block; margin-bottom: 6px;
+  }
+  .notice.quiet { border-left-color: var(--ink-faint); }
+  .notice.quiet .notice-label { color: var(--ink-faint); }
+
+  /* ---- to-line ---- */
+  .to-line {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; color: var(--ink-soft);
+    margin: 0 0 18px; padding-bottom: 14px; border-bottom: 1px solid var(--line);
+  }
+
+  .section-link {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 22px;
+    padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--surface); text-decoration: none; box-shadow: var(--shadow);
+  }
+  .section-link:hover { border-color: var(--brand-red); }
+  .section-link .arrow { color: var(--brand-red); font-weight: 700; }
+  .section-link span.label { color: var(--ink); font-weight: 600; font-size: 0.95rem; }
+
+  /* ---- glossary reference table ---- */
+  .gloss { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-top: 18px; }
+  .gloss-row { background: var(--surface); padding: 12px 16px; display: grid; grid-template-columns: minmax(90px,150px) 1fr; gap: 14px; }
+  .gloss-term { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 0.85rem; color: var(--brand-red); }
+  .gloss-def { color: var(--ink-soft); font-size: 0.9rem; }
+  @media (max-width: 560px) { .gloss-row { grid-template-columns: 1fr; gap: 3px; } }
+
+  footer {
+    border-top: 1px solid var(--line); padding: 30px 0 10px;
+    color: var(--ink-faint); font-size: 0.85rem;
+  }
+  footer a { color: var(--ink-soft); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    section { animation: rise 0.4s ease-out both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Block<em>Block</em></div>
+    <nav class="nav" aria-label="セクション">
+      <a href="#purpose">01 目的</a>
+      <a href="#blocks">02 物理ブロック</a>
+      <a href="#howto">03 使い方</a>
+      <a href="#system">04 しくみ</a>
+      <a href="#roadmap">05 足りないところ</a>
+      <a href="#glossary">用語集</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <p class="eyebrow">Block-based Math Learning System</p>
+    <h1 class="title">BlockBlock 仕様書</h1>
+    <p class="to-line">作成者: 神山まるごと高専 名和真結美</p>
+    <div style="display:flex; flex-wrap:wrap; gap:10px;">
+      <a class="section-link" href="https://github.com/NawaMayumi/blockblock" target="_blank" rel="noopener" style="margin-top:0;">
+        <span class="arrow">→</span><span class="label">github.com/NawaMayumi/blockblock(コード本体はこちら)</span>
+      </a>
+      <a class="section-link" href="https://nawamayumi.github.io/blockblock/" target="_blank" rel="noopener" style="margin-top:0;">
+        <span class="arrow">→</span><span class="label">今すぐ試す(公開URL)</span>
+      </a>
+    </div>
+    <p class="lede" style="margin-top:20px;">赤いブロックをカメラに映すだけで、掛け算・たし算・ひき算の練習ができるプロトタイプアプリの解説資料です。専門用語には <button class="term" type="button">下線<span class="tip">こんな風に点線の下線がついた言葉は、タップすると説明が出ます。</span></button> を引いてあるので、タップ(またはホバー)すると説明が出ます。</p>
+    <div class="hero-meta">
+      <span class="pill">対象: 年長〜小学2年生</span>
+      <span class="pill">状態: プロトタイプ・公開中</span>
+      <span class="pill">最終更新: 2026-09-11</span>
+    </div>
+    <div class="notice" style="margin-top:24px;">
+      <span class="notice-label">率直にお伝えしたいこと</span>
+      <p>このシステムは開発途中のプロトタイプです。<strong>このままの完成度で来年子どもたちに使ってもらうことは想定していません。</strong>実際の運用までには、この資料の後半(05)に書いた改善が必要だと考えています。ここでは現状をお伝えし、そのうえで今後どのように更新できるか考えられるヒントになればいいなと思います。</p>
+    </div>
+  </div>
+
+  <section id="purpose">
+    <div class="sec-head"><span class="sec-num">01</span><h2>目的</h2></div>
+    <p class="sec-sub">なぜこれを作っているのか、誰のためのものか。</p>
+
+    <p>BlockBlockは、子どもが手で触れる物理的なブロックと、画面の中のデジタルな反応を結びつける「Physical → Digital」な学習教材です。子どもが赤いブロックを机の上に並べると、カメラがその段数・列数を読み取り、画面がそれに応じて反応します。今回は掛け算の練習を最初の題材にしていますが、もともとの狙いは「先生が数学以外の活動(文字・図形・パターンなど)も後から載せられる土台を作る」ことにあります。</p>
+
+    <div class="facts">
+      <div class="fact"><p class="fact-label">対応する演算</p><p class="fact-value">掛け算 / たし算 / ひき算</p></div>
+      <div class="fact"><p class="fact-label">動作環境</p><p class="fact-value">カメラ付きのブラウザなら基本どれでも動作。AHISでの実運用は、子どもたちが使うChromebookを想定</p></div>
+      <div class="fact"><p class="fact-label">公開URL</p><p class="fact-value"><a href="https://nawamayumi.github.io/blockblock/" target="_blank" rel="noopener">nawamayumi.github.io/blockblock</a></p></div>
+      <div class="fact"><p class="fact-label">プライバシー</p><p class="fact-value">映像は一切外部送信されない(端末内処理)</p></div>
+      <div class="fact"><p class="fact-label">サーバー・DB</p><p class="fact-value">なし(ファイルを配るだけ)</p></div>
+      <div class="fact"><p class="fact-label">ソースコード</p><p class="fact-value"><a href="https://github.com/NawaMayumi/blockblock" target="_blank" rel="noopener">github.com/NawaMayumi/blockblock</a></p></div>
+    </div>
+  </section>
+
+  <section id="blocks">
+    <div class="sec-head"><span class="sec-num">02</span><h2>物理ブロックの仕様</h2></div>
+    <p class="sec-sub">画面ではなく、実物のブロック自体がどう作られているか。</p>
+
+    <p>市販の教材ではなく、試行錯誤しながら手作りしています。今の作り方は以下の通りです。</p>
+
+    <h3>赤ブロック(掛け算・たし算・ひき算で数を数えるブロック)</h3>
+    <p>木製の立方体ではなく、<strong>サイコロ</strong>にまずマグネットシートを貼り、その上から赤いマスキングテープで包んで作っています。さらに角に<strong>黄色いマスキングテープ</strong>を貼り、カメラで1個ずつ検出するための目印にしています。</p>
+    <p>黄色いテープは<strong>2枚重ね</strong>で貼っています。1枚だけだと下の赤色が透けてしまい、カメラには「赤に近い色」に見えて、目印として検出されなかったためです。</p>
+
+    <h3>数字ブロック(こたえを示すブロック)</h3>
+    <p>黒いシールに白い数字が印刷されたものを立方体に貼っていますが、黒色の面積だけではカメラでの検出精度が上がらなかったため、<strong>数字ブロックの周りにも赤いテープ</strong>を巻いて、「ここに数字ブロックがある」と見つけやすくしています。</p>
+    <p>数字の書体は現状<strong><button class="term" type="button">Futura<span class="tip">数字ブロックに実際に印刷されている書体の名前。角がシャープな幾何学的なデザインの書体です。</span></button></strong>という書体で印刷されたものでないと、正しく判定できません(理由は「04 しくみ」で説明します)。</p>
+
+    <h3>1人で九九を練習する場合に必要な数字ブロックのセット</h3>
+    <p>掛け算のこたえは2桁になることがあるため(例: 9 × 9 = 81)、数字ブロックを2つ隣り合わせに置いて表現します。1人で遊ぶだけであれば、各面に次の数字が印刷された3つの数字ブロック(サイコロなので1個につき6面)があれば足ります。</p>
+    <div class="facts" style="grid-template-columns: 1fr;">
+      <div class="fact"><p class="fact-label">ブロック A</p><p class="fact-value mono">1・2・3・4・5・6</p></div>
+      <div class="fact"><p class="fact-label">ブロック B</p><p class="fact-value mono">7・8・9・0・1・2</p></div>
+      <div class="fact"><p class="fact-label">ブロック C</p><p class="fact-value mono">3・4・5・6・7・8</p></div>
+    </div>
+
+    <div class="notice">
+      <span class="notice-label">補足</span>
+      <p>この仕様は、うまくいかない方法を何度も試した末にたどり着いたものです。素材や色、書体を変える場合は、検出ロジック側の調整(色のしきい値の再設定や、数字のお手本の作り直し)がセットで必要になります。詳しくは<a href="#roadmap">「05 足りないところ」</a>を参照してください。</p>
+    </div>
+  </section>
+
+  <section id="howto">
+    <div class="sec-head"><span class="sec-num">03</span><h2>使い方</h2></div>
+    <p class="sec-sub">今の時点で、実際に何ができるか。</p>
+
+    <p>画面上部の×(掛け算)・+(たし算)・−(ひき算)の切り替えチップで、いつでもモードを変えられます。3つのモードとも、式(問題)の答えそのものは画面に表示されません。子どもが自分で数えて、数字ブロックで答えを示す設計です。</p>
+
+    <h3>掛け算モード</h3>
+    <ul>
+      <li>赤ブロックを行×列の格子状に並べます。<strong>最低4個</strong>ないと、個数だけが表示され、式(◯ × ◯ = ?)にはなりません(3個以下だと偶然の並びと区別できないため)。</li>
+      <li>並びが2秒ほど安定すると、「3 × 4 = ?」のように式が表示されます。</li>
+      <li><strong>こたえが2桁になる場合</strong>(例: 3 × 4 = 12)は、数字ブロックを2つ隣り合わせにくっつけて置きます。左のブロックが十の位、右のブロックが一の位として読み取られます。</li>
+      <li>式とこたえの数字ブロックが一致すると正解演出が流れます。一致するまでは「もう一回」と表示され続け、正しい答えそのものはヒントとして表示されません。</li>
+    </ul>
+
+    <h3>たし算モード</h3>
+    <ul>
+      <li>画面左右の2つの枠それぞれにブロックを置き、それぞれの個数を数えます。</li>
+      <li>右側の黒い枠(こたえゾーン)に数字ブロックを見せると、左+右の合計と一致するか採点されます。</li>
+    </ul>
+
+    <h3>ひき算モード</h3>
+    <ul>
+      <li>「山」の枠にブロックを置き、そこから実際に一部を「取り除く」枠へ動かします。</li>
+      <li>取り除き始めた瞬間に、山の最初の個数が固定されます(以降は山の今の個数を表示しません。それ自体が答えのヒントになってしまうためです)。</li>
+      <li>最後にこたえの数字ブロックを置くと、①山に実際に残っている個数、②最初の個数−取り除いた個数、の<strong>両方</strong>がこたえの数字と一致しているかを見ます。数だけ帳尻を合わせても、実際に取り除いた個数が違えば不正解になります。</li>
+    </ul>
+  </section>
+
+  <section id="system">
+    <div class="sec-head"><span class="sec-num">04</span><h2>しくみ</h2></div>
+    <p class="sec-sub">画面の裏側で、実際に何が起きているか。</p>
+
+    <p>特別なAI画像認識サービスは使っていません。ブラウザが標準で持っている機能(カメラ映像の取得・画像の色を数値として読み取る機能)だけで、次の図のような2つの判定を同時に走らせ、両方が2秒以上安定して一致したときだけ「せいかい」と表示します。</p>
+
+    <figure class="diagram">
+      <div class="diagram-scroll">
+        <svg viewBox="0 0 640 700" role="img" aria-label="カメラ映像から、ブロックの数を数える判定と、答えの数字を読み取る判定が同時に走り、2秒間安定してから両者を比較して正解演出につながる流れを示す図">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"></path>
+            </marker>
+          </defs>
+
+          <!-- source -->
+          <g class="node">
+            <rect x="190" y="14" width="260" height="50" rx="10"></rect>
+            <text x="320" y="34" text-anchor="middle" font-size="13" font-weight="600">カメラ映像から</text>
+            <text x="320" y="50" text-anchor="middle" font-size="13" font-weight="600">1コマ(フレーム)を取り込む</text>
+          </g>
+
+          <!-- split lines -->
+          <path class="flow-line" d="M280,64 C230,90 200,100 165,128" marker-end="url(#arrow)"></path>
+          <path class="flow-line" d="M360,64 C410,90 440,100 475,128" marker-end="url(#arrow)"></path>
+          <text class="branch-label" x="205" y="98" text-anchor="middle">①ブロック側</text>
+          <text class="branch-label" x="435" y="98" text-anchor="middle">②こたえ側</text>
+
+          <!-- left column -->
+          <g class="node">
+            <rect x="30" y="130" width="260" height="54" rx="10"></rect>
+            <text x="160" y="151" text-anchor="middle" font-size="13" font-weight="600">赤ピクセルを判定</text>
+            <text x="160" y="168" text-anchor="middle" font-size="12">(RGBの数値で計算)</text>
+          </g>
+          <path class="flow-line" d="M160,184 L160,204" marker-end="url(#arrow)"></path>
+          <g class="node">
+            <rect x="30" y="204" width="260" height="54" rx="10"></rect>
+            <text x="160" y="226" text-anchor="middle" font-size="13" font-weight="600">隣り合う赤を</text>
+            <text x="160" y="243" text-anchor="middle" font-size="12">1つのかたまりにまとめる</text>
+          </g>
+          <path class="flow-line" d="M160,258 L160,278" marker-end="url(#arrow)"></path>
+          <g class="node">
+            <rect x="30" y="278" width="260" height="54" rx="10"></rect>
+            <text x="160" y="300" text-anchor="middle" font-size="13" font-weight="600">行・列に整理</text>
+            <text x="160" y="317" text-anchor="middle" font-size="12">+ 信頼度スコアを計算</text>
+          </g>
+          <path class="flow-line" d="M160,332 L160,352" marker-end="url(#arrow)"></path>
+          <g class="node">
+            <rect x="30" y="352" width="260" height="54" rx="10"></rect>
+            <text x="160" y="374" text-anchor="middle" font-size="13" font-weight="700">例: 「3行 × 4列」</text>
+            <text x="160" y="391" text-anchor="middle" font-size="12">という問題の材料</text>
+          </g>
+
+          <!-- right column -->
+          <g class="node">
+            <rect x="350" y="130" width="260" height="54" rx="10"></rect>
+            <text x="480" y="151" text-anchor="middle" font-size="13" font-weight="600">黒いシールの範囲を判定</text>
+            <text x="480" y="168" text-anchor="middle" font-size="12">(局所的なしきい値で計算)</text>
+          </g>
+          <path class="flow-line" d="M480,184 L480,204" marker-end="url(#arrow)"></path>
+          <g class="node">
+            <rect x="350" y="204" width="260" height="54" rx="10"></rect>
+            <text x="480" y="226" text-anchor="middle" font-size="13" font-weight="600">28 × 28マスの</text>
+            <text x="480" y="243" text-anchor="middle" font-size="12">白黒の格子に変換</text>
+          </g>
+          <path class="flow-line" d="M480,258 L480,278" marker-end="url(#arrow)"></path>
+          <g class="node">
+            <rect x="350" y="278" width="260" height="54" rx="10"></rect>
+            <text x="480" y="300" text-anchor="middle" font-size="13" font-weight="600">0〜9のお手本と</text>
+            <text x="480" y="317" text-anchor="middle" font-size="12">形を比較(テンプレート照合)</text>
+          </g>
+          <path class="flow-line" d="M480,332 L480,352" marker-end="url(#arrow)"></path>
+          <g class="node">
+            <rect x="350" y="352" width="260" height="54" rx="10"></rect>
+            <text x="480" y="374" text-anchor="middle" font-size="13" font-weight="700">例: 読み取った数字「12」</text>
+          </g>
+
+          <!-- converge -->
+          <path class="flow-line" d="M160,406 C160,430 230,432 300,438" marker-end="url(#arrow)"></path>
+          <path class="flow-line" d="M480,406 C480,430 410,432 340,438" marker-end="url(#arrow)"></path>
+          <g class="node">
+            <rect x="190" y="440" width="260" height="54" rx="10"></rect>
+            <text x="320" y="462" text-anchor="middle" font-size="13" font-weight="600">直近2秒間、同じ判定が</text>
+            <text x="320" y="479" text-anchor="middle" font-size="12">7割以上続いたか?(安定化)</text>
+          </g>
+          <path class="flow-line" d="M320,494 L320,524" marker-end="url(#arrow)"></path>
+          <g class="node">
+            <rect x="190" y="524" width="260" height="54" rx="10"></rect>
+            <text x="320" y="546" text-anchor="middle" font-size="13" font-weight="600">式の答えと、読み取った</text>
+            <text x="320" y="563" text-anchor="middle" font-size="12">数字を比較する</text>
+          </g>
+
+          <!-- outcomes -->
+          <path class="flow-line" d="M250,578 C220,592 190,596 165,606" marker-end="url(#arrow)"></path>
+          <path class="flow-line" d="M390,578 C420,592 450,596 475,606" marker-end="url(#arrow)"></path>
+          <g class="node outcome-yes">
+            <rect x="30" y="608" width="260" height="54" rx="10"></rect>
+            <text x="160" y="630" text-anchor="middle" font-size="13" font-weight="700">一致</text>
+            <text x="160" y="647" text-anchor="middle" font-size="12">→ せいかい演出</text>
+          </g>
+          <g class="node outcome-no">
+            <rect x="350" y="608" width="260" height="54" rx="10"></rect>
+            <text x="480" y="630" text-anchor="middle" font-size="13" font-weight="700">不一致</text>
+            <text x="480" y="647" text-anchor="middle" font-size="12">→「もう一回」表示</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>図: カメラの1コマから、①ブロックの個数を数える判定と②こたえの数字を読み取る判定が並行して走り、両方とも2秒以上安定してから初めて比較・採点される。</figcaption>
+    </figure>
+
+    <div class="notice">
+      <span class="notice-label">①ブロック側の限界: 目印(黄色いテープ)が必須</span>
+      <p>ブロック同士がぴったりくっついて影がほとんど出ない置き方をされると、影の切れ目だけでは何個あるか判別できなくなります。開発中、影を頼りにする方式・照明を工夫する方式など<strong>さまざまな方法を試しましたが、最終的に確実に検出できたのは「各ブロックの角に黄色いテープの目印を1つずつ貼る」方法だけ</strong>でした(現在の既定設定)。目印なしでの検出方式も実装はされていますが、実用上は目印ありを強く推奨します。</p>
+    </div>
+
+    <div class="notice">
+      <span class="notice-label">②こたえ側の限界: Futura書体が前提</span>
+      <p>数字の「お手本」は、実際に印刷されたFutura書体の数字の形をもとに作られています。そのため<strong>数字ブロックの数字がFutura書体で印刷されていることが前提</strong>です。違う書体で印刷すると形が一致せず、正しく読み取れない可能性が高くなります。書体を変える場合は、新しい書体の数字のお手本(SVG)を作り直す必要があります。</p>
+    </div>
+
+    <div class="notice quiet">
+      <span class="notice-label">見た目についての補足</span>
+      <p>正解した瞬間にブロックが1個ずつ浮かび上がったり、宝石が飛び出してきたりする演出がありますが、これは<strong>見た目だけの2Dアニメーション</strong>です。実際にカメラが空間の奥行きやブロックの3D位置を認識しているわけではなく、タイミングと拡大縮小だけで「それっぽく」見せています。</p>
+    </div>
+
+    <h3>ホスティング(公開の仕組み)</h3>
+    <p>コードは<button class="term" type="button">GitHub<span class="tip">プログラムのコードを保管・共同編集するための、世界的に使われているウェブサービス。</span></button>の<button class="term" type="button">リポジトリ<span class="tip">1つのプロジェクトのファイル一式と、その変更履歴をまとめて保管する「入れ物」のこと。</span></button>(<code>NawaMayumi/blockblock</code>)で管理しています。<code>main</code>ブランチに<button class="term" type="button">push<span class="tip">手元で行った変更を、GitHub上の共有リポジトリに送って反映させること。</span></button>されるたびに、GitHub Actions(自動処理の仕組み)が自動的に<button class="term" type="button">GitHub Pages<span class="tip">GitHubが無料で提供している、静的サイトをそのままインターネットに公開できる仕組み。</span></button>へ反映するよう設定済みです。つまり、コードを直せば数十秒後には本番URLに反映されます。</p>
+
+    <h4 style="font-size:0.95rem; margin: 22px 0 4px; color: var(--ink-soft);">ファイル構成(ファイル名と役割)</h4>
+    <div class="facts" style="grid-template-columns: 1fr;">
+      <div class="fact"><p class="fact-label">index.html</p><p class="fact-value">画面のHTML本体(HUD・設定ドロワーなど)</p></div>
+      <div class="fact"><p class="fact-label">app.js</p><p class="fact-value">検出ロジック・安定化・演出、すべてのアプリの動き</p></div>
+      <div class="fact"><p class="fact-label">digit-model.js / digits/</p><p class="fact-value">0〜9の数字認識に使うお手本データ(SVG)</p></div>
+      <div class="fact"><p class="fact-label">styles.css</p><p class="fact-value">見た目(色・フォント・レイアウト)</p></div>
+      <div class="fact"><p class="fact-label">serve.py</p><p class="fact-value">手元のPCで動作確認するための簡易サーバー(開発者用)</p></div>
+    </div>
+  </section>
+
+  <section id="roadmap">
+    <div class="sec-head"><span class="sec-num">05</span><h2>足りないところと、その直し方</h2></div>
+    <p class="sec-sub">今のBlockBlockに欠けている部分を、優先度の高い順に並べました。「今こうなっている」と「では、どうするか」をセットで書いています。</p>
+
+    <p>なお、<strong>コードそのものの直し方(ターミナル・GitHub・Claude Codeの使い方)</strong>は、この資料とは別に1本のページにまとめています。以下はあくまで「何を直すべきか」の一覧で、「どう直すか」は下記のページをご覧ください。</p>
+    <a class="section-link" href="https://claude.ai/code/artifact/af72b931-b072-44ef-90f7-302937a5152e" target="_blank" rel="noopener">
+      <span class="arrow">→</span><span class="label">別ページ「BlockBlock 更新のしかた」を見る</span>
+    </a>
+
+    <div class="rank-legend" style="margin-top:28px;">
+      <span><span class="dot" style="background:var(--brand-red);"></span>マスト(来年までに対応したい)</span>
+      <span><span class="dot" style="background:var(--status-todo-ink);"></span>重要(早めに対応したい)</span>
+      <span><span class="dot" style="background:var(--ink-faint);"></span>検討(声が挙がってから)</span>
+    </div>
+
+    <div class="stack">
+      <div class="card gap-card">
+        <div class="card-head"><h4>Chromebookで撮影しやすい台がない</h4><span class="badge rank-must">マスト</span></div>
+        <p class="gap-now">実際にAHISで使うのは子どもたち用のChromebookです。手持ちで撮影すると、カメラの角度や距離がブロックの数え間違いの原因になります。</p>
+        <p class="gap-fix"><b>直すなら:</b> Chromebookとブロックの位置を毎回同じに保てる、簡単な撮影スタンド(台)を用意する。</p>
+      </div>
+      <div class="card gap-card">
+        <div class="card-head"><h4>ブロックが壊れやすい</h4><span class="badge rank-must">マスト</span></div>
+        <p class="gap-now">今の赤ブロック・数字ブロックは、サイコロにテープを貼った簡易的な作りです。特に数字ブロックは柔らかく、使っているうちに凹んで(ベコベコになって)しまいます。</p>
+        <p class="gap-fix"><b>直すなら:</b> 木材など、丈夫で扱いやすい素材で作り直す。学校に木工設備があれば製作できると思われます。</p>
+      </div>
+      <div class="card gap-card">
+        <div class="card-head"><h4>教室の明るさによって検出精度が変わる</h4><span class="badge rank-important">重要</span></div>
+        <p class="gap-now">今は「どのくらい赤ければ赤ブロックとみなすか」を、人が設定画面のスライダーで手で調整する必要があります。教室ごとに照明が違うと、そのたびに調整し直しになる可能性があります。</p>
+        <p class="gap-fix"><b>直すなら:</b> いろいろな教室の映像をあらかじめ集めておき、その場の明るさに合わせて自動で調整幅を決められるようにする。</p>
+      </div>
+      <div class="card gap-card">
+        <div class="card-head"><h4>数字ブロックを上下逆に置くと読み間違える</h4><span class="badge rank-important">重要</span></div>
+        <p class="gap-now">ブロックの上下を見分ける目印がないため、上下逆に置かれると「6」が「9」に読み間違えられることがあります。</p>
+        <p class="gap-fix"><b>直すなら:</b> ブロックの角に、上下を判定するための小さな印を追加する。</p>
+      </div>
+      <div class="card gap-card">
+        <div class="card-head"><h4>掛け算以外の活動を先生が自分で追加できない</h4><span class="badge rank-later">検討</span></div>
+        <p class="gap-now">「掛け算」「たし算」「ひき算」以外の活動(文字・図形・パターンなど)を追加するには、今のところエンジニアによるコードの変更が必要です。</p>
+        <p class="gap-fix"><b>直すなら:</b> 新しい活動を後から差し替えられる作りに変え、将来的には先生自身が設定画面から組み立てられるようにする。</p>
+      </div>
+      <div class="card gap-card">
+        <div class="card-head"><h4>続けて遊ぶ楽しさや、生徒ごとの様子が見えない</h4><span class="badge rank-later">検討</span></div>
+        <p class="gap-now">今は正解数がその端末だけに保存され(ログイン機能なし)、誰がどこでつまずいているかは分かりません。</p>
+        <p class="gap-fix"><b>直すなら:</b> ポイントを貯めるとアイテムがもらえるようなクエスト要素を足し、あわせてログイン機能を用意すれば、生徒ごとの苦手分野を見つけたり、先生が進捗を確認できるダッシュボードも作れるようになります。</p>
+      </div>
+      <div class="card gap-card">
+        <div class="card-head"><h4>誰でも本番用のコードを直接書き換えられる</h4><span class="badge rank-later">検討</span></div>
+        <p class="gap-now">今は誰でも公開中のコード(<code>main</code>ブランチ)に直接反映できてしまう状態です。</p>
+        <p class="gap-fix"><b>直すなら:</b> 複数人で編集するようになったら、GitHubの<button class="term" type="button">ブランチ保護<span class="tip">誰かがうっかり本番のコードに直接反映して、動いているアプリを壊してしまうことを防ぐための設定。レビューを経てからでないと反映されないようにできる。</span></button>の仕組みを使い、「反映する前に別の人が確認する」というルールにする。</p>
+      </div>
+    </div>
+
+    <div class="notice quiet">
+      <span class="notice-label">あえて書かなかったこと</span>
+      <p>「手書きの数字を認識する機能」は今回入れなくてよいと考えています。今のブロック(型と照合する方式)で目的は十分果たせています。「自動テスト」も、今回は挙げていません。ブロックの検出は最終的に物理的な条件(照明・置き方など)に左右されるため、コードの自動テストだけでは確認しきれず、実機で人が確認する以外の方法がないためです。</p>
+    </div>
+  </section>
+
+  <section id="glossary">
+    <div class="sec-head"><span class="sec-num">–</span><h2>用語集</h2></div>
+    <p class="sec-sub">本文中でタップできる用語のまとめです。印刷して読む場合はこちらをどうぞ。</p>
+    <div class="gloss">
+      <div class="gloss-row"><div class="gloss-term">静的サイト</div><div class="gloss-def">サーバー側でプログラムを実行せず、あらかじめ用意したファイルをそのまま配るだけのウェブサイト。データベースやログインを持たず、仕組みがシンプル。</div></div>
+      <div class="gloss-row"><div class="gloss-term">RGB値</div><div class="gloss-def">1つの色を「赤・緑・青」それぞれの強さの数値で表したもの。画像処理はこの数値をもとに計算する。</div></div>
+      <div class="gloss-row"><div class="gloss-term">連結成分</div><div class="gloss-def">隣り合っている同じ色のピクセル同士をひとつのグループとしてまとめたもの。ブロック1個分のかたまりに対応する。</div></div>
+      <div class="gloss-row"><div class="gloss-term">信頼度スコア</div><div class="gloss-def">検出した並びが「本当にきれいな行・列か」を0〜1の数値で表したもの。低いと式として確定しない。</div></div>
+      <div class="gloss-row"><div class="gloss-term">テンプレートマッチング</div><div class="gloss-def">あらかじめ用意した「お手本の形」と、実際に映った形を比べて、一番近いものを答えとする判定方法。</div></div>
+      <div class="gloss-row"><div class="gloss-term">安定化</div><div class="gloss-def">1コマだけの誤判定に振り回されないよう、一定時間・一定割合以上同じ結果が続いてから初めて確定とみなす仕組み。</div></div>
+      <div class="gloss-row"><div class="gloss-term">リポジトリ</div><div class="gloss-def">1つのプロジェクトのファイル一式と変更履歴をまとめて保管する「入れ物」。GitHub上に置かれる。</div></div>
+      <div class="gloss-row"><div class="gloss-term">GitHub Pages</div><div class="gloss-def">GitHubが無料で提供している、静的サイトをそのままインターネットに公開できる仕組み。</div></div>
+      <div class="gloss-row"><div class="gloss-term">commit / push</div><div class="gloss-def">commitは変更を1つの記録としてまとめること、pushはその記録を共有リポジトリに送って反映させること。</div></div>
+      <div class="gloss-row"><div class="gloss-term">ブランチ保護</div><div class="gloss-def">本番のコード(mainブランチ)に、レビューを経ないまま誰でも直接pushできてしまわないようにする設定。</div></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>ソース: <a href="https://github.com/NawaMayumi/blockblock" target="_blank" rel="noopener">github.com/NawaMayumi/blockblock</a> ・ 詳しい実装の説明は <a href="https://github.com/NawaMayumi/blockblock/blob/main/README.md" target="_blank" rel="noopener">README</a> ・ 改訂の全履歴は <a href="https://github.com/NawaMayumi/blockblock/blob/main/HISTORY.md" target="_blank" rel="noopener">HISTORY.md</a> にあります。</p>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var openTerm = null;
+    function closeOpen() {
+      if (openTerm) { openTerm.classList.remove('open'); openTerm = null; }
+    }
+    document.querySelectorAll('button.term').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var wasOpen = btn.classList.contains('open');
+        closeOpen();
+        if (!wasOpen) { btn.classList.add('open'); openTerm = btn; }
+      });
+    });
+    document.addEventListener('click', closeOpen);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeOpen();
+    });
+  })();
+</script>
